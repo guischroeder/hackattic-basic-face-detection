@@ -1,17 +1,22 @@
 package main
 
-import  (
-   "net/http"
+import (
+	"log"
 
-   "github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"github.com/gin-gonic/gin"
+
+	"hackattic-base-face-detection/controller"
 )
 
 func main() {
-   router := gin.Default()
-   router.GET("/hello", func (c *gin.Context) {
-      c.IndentedJSON(http.StatusOK, "Hello")
-   })
+    err := godotenv.Load(".env")
+    if err != nil {
+        log.Fatalf("Error loading .env file: %s", err)
+    }
 
-   router.Run()
+    router := gin.Default()
+    router.POST("/solve", controller.SolveProblem)
+    router.Run()
 }
 
