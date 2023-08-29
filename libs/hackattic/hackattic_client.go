@@ -15,7 +15,7 @@ type Problem struct {
     ImageUrl string `json:"image_url"`
 }
 
-func (hm *HackatticClient) GetProblem(accessToken string) (Problem, error) {
+func (hm HackatticClient) GetProblem(accessToken string) (Problem, error) {
     url := fmt.Sprintf("%s/problem?access_token=%s", hm.BaseUrl, accessToken)
     request, err := http.NewRequest(http.MethodGet, url, nil)
 
