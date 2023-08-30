@@ -1,4 +1,4 @@
-module hackattic-base-face-detection
+module hackattic-basic-face-detection
 
 go 1.21.0
 

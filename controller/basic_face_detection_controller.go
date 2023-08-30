@@ -8,10 +8,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"hackattic-base-face-detection/libs/aws"
-	"hackattic-base-face-detection/libs/aws/rekognition"
-	"hackattic-base-face-detection/libs/aws/s3"
-	"hackattic-base-face-detection/libs/hackattic"
+	"hackattic-basic-face-detection/libs/aws"
+	"hackattic-basic-face-detection/libs/aws/rekognition"
+	"hackattic-basic-face-detection/libs/aws/s3"
+	"hackattic-basic-face-detection/libs/hackattic"
 )
 
 func SolveProblem(context *gin.Context) {
