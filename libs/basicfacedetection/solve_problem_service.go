@@ -39,23 +39,10 @@ func (s *SolveProblemService) Perform() error {
         return err
     }
 
-    resp, err := http.Get(problem.ImageUrl)
-    if err != nil {
-        return err
-    }
-
-    defer resp.Body.Close()
-
-    data, _ := io.ReadAll(resp.Body)
-    reader := strings.NewReader(string(data))
-
     bucket := os.Getenv("S3_BUCKET_NAME")
     path := "media/faces.jpg"
-    err = s3client.Upload(s.s3Client, s3client.UploadInput{
-        Bucket: bucket,
-        Path: path,
-        Image: io.ReadSeeker(reader), 
-    })
+
+    err = s.uploadImageFromUrlToS3(problem.ImageUrl, bucket, path)
     if err != nil {
         return err
     }
@@ -71,6 +58,29 @@ func (s *SolveProblemService) Perform() error {
     }
 
     fmt.Println(detectedFaces)
+
+    return nil
+}
+
+func (s *SolveProblemService) uploadImageFromUrlToS3(
+    imageUrl string, bucket string, path string) error {
+    resp, err := http.Get(imageUrl)
+    if err != nil {
+        return err
+    }
+    defer resp.Body.Close()
+
+    data, _ := io.ReadAll(resp.Body)
+    reader := strings.NewReader(string(data))
+
+    err = s3client.Upload(s.s3Client, s3client.UploadInput{
+        Bucket: bucket,
+        Path: path,
+        Image: io.ReadSeeker(reader), 
+    })
+    if err != nil {
+        return err
+    }
 
     return nil
 }
