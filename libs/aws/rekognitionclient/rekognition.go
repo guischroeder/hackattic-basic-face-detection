@@ -1,4 +1,4 @@
-package rekognition
+package rekognitionclient
 
 import (
 		"github.com/aws/aws-sdk-go/aws/session"
