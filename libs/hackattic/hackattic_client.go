@@ -7,7 +7,7 @@ import (
 )
 
 type HackatticClient struct {
-    BaseUrl string
+    AccessToken string
     HttpClient http.Client
 }
 
@@ -15,8 +15,9 @@ type Problem struct {
     ImageUrl string `json:"image_url"`
 }
 
-func (hm HackatticClient) GetProblem(accessToken string) (Problem, error) {
-    url := fmt.Sprintf("%s/problem?access_token=%s", hm.BaseUrl, accessToken)
+func (h HackatticClient) GetProblem() (Problem, error) {
+    baseUrl := "https://hackattic.com/challenges/basic_face_detection"
+    url := fmt.Sprintf("%s/problem?access_token=%s", baseUrl, h.AccessToken)
     request, err := http.NewRequest(http.MethodGet, url, nil)
 
     problem := Problem{}
@@ -24,7 +25,7 @@ func (hm HackatticClient) GetProblem(accessToken string) (Problem, error) {
         return problem, err
     }
 
-    response, err := hm.HttpClient.Do(request)
+    response, err := h.HttpClient.Do(request)
     if err != nil {
         return problem, err
     }

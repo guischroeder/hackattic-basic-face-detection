@@ -21,9 +21,9 @@ func TestGetProblem(t *testing.T) {
     defer server.Close()
 
     hm := HackatticClient{
-        BaseUrl: server.URL,
+        AccessToken: "token",
     }
-    result, err := hm.GetProblem("abc123")
+    result, err := hm.GetProblem()
     if err != nil {
         t.Error("TestGetProblem failed")
         return

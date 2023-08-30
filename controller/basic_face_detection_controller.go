@@ -16,11 +16,10 @@ import (
 
 func SolveProblem(context *gin.Context) {
     hackatticManager := hackattic.HackatticClient{
-        BaseUrl: "https://hackattic.com/challenges/basic_face_detection",
+        AccessToken: os.Getenv("HACKATTIC_ACCESS_TOKEN"),
     }
-    accessToken := os.Getenv("HACKATTIC_ACCESS_TOKEN")
 
-    problem, err := hackatticManager.GetProblem(accessToken)
+    problem, err := hackatticManager.GetProblem()
     if err != nil {
         context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
