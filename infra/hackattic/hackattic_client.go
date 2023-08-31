@@ -49,7 +49,7 @@ type Result struct {
 }
 
 func (h HackatticClient) SubmitSolution(faceTiles [][2]int) (Result, error) {
-    url := fmt.Sprintf("%s/solve?access_token=%s", BASE_URL, h.AccessToken)
+    url := fmt.Sprintf("%s/solve?access_token=%s&playground=1", BASE_URL, h.AccessToken)
     result := Result{}
 
     buffer := new(bytes.Buffer)

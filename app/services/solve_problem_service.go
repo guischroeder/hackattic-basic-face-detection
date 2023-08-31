@@ -1,4 +1,4 @@
-package basicfacedetection
+package services
 
 import (
 	"io"
@@ -6,13 +6,11 @@ import (
 	"os"
 	"strings"
 
-	"hackattic-basic-face-detection/libs/aws/rekognitionclient"
-	"hackattic-basic-face-detection/libs/aws/s3client"
-	"hackattic-basic-face-detection/libs/basicfacedetection/helpers"
-	"hackattic-basic-face-detection/libs/hackattic"
+	"hackattic-basic-face-detection/infra/aws"
+	"hackattic-basic-face-detection/app/helpers"
+	"hackattic-basic-face-detection/infra/hackattic"
 
 	"github.com/aws/aws-sdk-go/service/rekognition"
-	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 type HackatticClient interface {
@@ -20,12 +18,12 @@ type HackatticClient interface {
 }
 type SolveProblemService struct {
     hackattic HackatticClient
-    s3Client *s3.S3
-    rekognitionClient *rekognition.Rekognition
+    s3Client *aws.S3Client
+    rekognitionClient *aws.RekognitionClient
 }
 
 func NewSolveProblemService(hackattic HackatticClient,
-    s3Client *s3.S3, rekognitionClient *rekognition.Rekognition) *SolveProblemService {
+    s3Client *aws.S3Client, rekognitionClient *aws.RekognitionClient) *SolveProblemService {
     return &SolveProblemService{
         hackattic: hackattic,
         s3Client: s3Client,
@@ -47,12 +45,10 @@ func (s *SolveProblemService) Perform() ([][2]int, error) {
         return nil, err
     }
 
-    detectedFaces, err := rekognitionclient.DetectFaces(
-        s.rekognitionClient, rekognitionclient.S3Object{
-            Bucket: bucket,
-            Name: path,
-        },
-    )
+    detectedFaces, err := s.rekognitionClient.DetectFaces(aws.S3Object{
+        Bucket: bucket,
+        Name: path,
+    })
     if err != nil {
         return nil, err
     }
@@ -71,7 +67,7 @@ func (s *SolveProblemService) uploadImageFromUrlToS3(
     data, _ := io.ReadAll(resp.Body)
     reader := strings.NewReader(string(data))
 
-    err = s3client.Upload(s.s3Client, s3client.UploadInput{
+    err = s.s3Client.Upload(aws.UploadInput{
         Bucket: bucket,
         Path: path,
         Image: io.ReadSeeker(reader), 

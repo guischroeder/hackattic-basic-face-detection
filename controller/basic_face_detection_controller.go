@@ -6,11 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"hackattic-basic-face-detection/libs/aws"
-	"hackattic-basic-face-detection/libs/aws/rekognitionclient"
-	"hackattic-basic-face-detection/libs/aws/s3client"
-	"hackattic-basic-face-detection/libs/basicfacedetection"
-	"hackattic-basic-face-detection/libs/hackattic"
+	"hackattic-basic-face-detection/app/services"
+	"hackattic-basic-face-detection/infra/aws"
+	"hackattic-basic-face-detection/infra/hackattic"
 )
 
 func SolveProblem(context *gin.Context) {
@@ -26,15 +24,18 @@ func SolveProblem(context *gin.Context) {
         context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
-    s3Client := s3client.S3(session)
-    rekognitionClient := rekognitionclient.Rekognition(session)
-    solveProblem := basicfacedetection.NewSolveProblemService(
+
+    s3Client := aws.NewS3Client(session)
+    rekognitionClient := aws.NewRekognitionClient(session)
+
+    solveProblem := services.NewSolveProblemService(
         hackatticClient,
         s3Client,
         rekognitionClient,
     )
 
     faceContainingTiles, err := solveProblem.Perform()
+
     if err != nil {
         context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
