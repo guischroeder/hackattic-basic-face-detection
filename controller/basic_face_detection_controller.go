@@ -28,11 +28,17 @@ func SolveProblem(context *gin.Context) {
     }
     s3Client := s3client.S3(session)
     rekognitionClient := rekognitionclient.Rekognition(session)
-
     solveProblem := basicfacedetection.NewSolveProblemService(
         hackatticClient,
         s3Client,
         rekognitionClient,
     )
-    solveProblem.Perform()
+
+    faceContainingTile, err := solveProblem.Perform()
+    if err != nil {
+        context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    context.IndentedJSON(http.StatusOK, gin.H{"face_tiles": faceContainingTile})
 }

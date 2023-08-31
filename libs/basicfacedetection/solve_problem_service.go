@@ -1,7 +1,6 @@
 package basicfacedetection
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -9,6 +8,7 @@ import (
 
 	"hackattic-basic-face-detection/libs/aws/rekognitionclient"
 	"hackattic-basic-face-detection/libs/aws/s3client"
+	"hackattic-basic-face-detection/libs/basicfacedetection/helpers"
 	"hackattic-basic-face-detection/libs/hackattic"
 
 	"github.com/aws/aws-sdk-go/service/rekognition"
@@ -33,10 +33,10 @@ func NewSolveProblemService(hackattic HackatticClient,
     }
 }
 
-func (s *SolveProblemService) Perform() error {
+func (s *SolveProblemService) Perform() ([][2]int, error) {
     problem, err := s.hackattic.GetProblem()
     if err != nil {
-        return err
+        return nil, err
     }
 
     bucket := os.Getenv("S3_BUCKET_NAME")
@@ -44,7 +44,7 @@ func (s *SolveProblemService) Perform() error {
 
     err = s.uploadImageFromUrlToS3(problem.ImageUrl, bucket, path)
     if err != nil {
-        return err
+        return nil, err
     }
 
     detectedFaces, err := rekognitionclient.DetectFaces(
@@ -54,12 +54,10 @@ func (s *SolveProblemService) Perform() error {
         },
     )
     if err != nil {
-        return err
+        return nil, err
     }
 
-    fmt.Println(detectedFaces)
-
-    return nil
+    return s.findFaceContainingTiles(*detectedFaces), nil
 }
 
 func (s *SolveProblemService) uploadImageFromUrlToS3(
@@ -84,3 +82,44 @@ func (s *SolveProblemService) uploadImageFromUrlToS3(
 
     return nil
 }
+
+type BoundingBox struct {
+    Height float64
+    Left float64
+    Top float64
+    Width float64
+}
+
+func (s SolveProblemService) findFaceContainingTiles(
+    detectedFaces rekognition.DetectFacesOutput) [][2]int {
+    faceDetails := detectedFaces.FaceDetails
+
+    // get size from image
+    imageHeight := 800.0
+    imageWidth := 800.0
+    scaledBoundingBoxes := make([]BoundingBox, 0, cap(faceDetails))
+    for _, faceDetail := range faceDetails {
+        boundingBox := BoundingBox{
+            Height: *faceDetail.BoundingBox.Height * imageHeight,
+            Left: *faceDetail.BoundingBox.Left * imageWidth,
+            Top: *faceDetail.BoundingBox.Top * imageHeight,
+            Width: *faceDetail.BoundingBox.Width * imageWidth,
+        }
+
+        scaledBoundingBoxes = append(scaledBoundingBoxes, boundingBox)
+    }
+
+    faceContainingTiles := make([][2]int, 0, cap(scaledBoundingBoxes))
+    for _, boundingBox := range scaledBoundingBoxes {
+        x := helpers.TileCoordinate(
+            helpers.CenterOfSquare(boundingBox.Left, boundingBox.Width),
+        )
+        y := helpers.TileCoordinate(
+            helpers.CenterOfSquare(boundingBox.Top, boundingBox.Height),
+        )
+
+        faceContainingTiles = append(faceContainingTiles, [2]int{x, y})
+    }
+    
+    return faceContainingTiles
+} 
