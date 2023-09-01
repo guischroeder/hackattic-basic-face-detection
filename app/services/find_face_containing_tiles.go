@@ -16,23 +16,23 @@ import (
 type HackatticClient interface {
     GetProblem() (hackattic.Problem, error)
 }
-type SolveProblemService struct {
+type FindFaceContainingTiles struct {
     hackattic HackatticClient
     s3Client *aws.S3Client
     rekognitionClient *aws.RekognitionClient
 }
 
-func NewSolveProblemService(hackattic HackatticClient,
-    s3Client *aws.S3Client, rekognitionClient *aws.RekognitionClient) *SolveProblemService {
-    return &SolveProblemService{
+func NewFindFaceContainingTiles(hackattic HackatticClient,
+    s3Client *aws.S3Client, rekognitionClient *aws.RekognitionClient) *FindFaceContainingTiles {
+    return &FindFaceContainingTiles{
         hackattic: hackattic,
         s3Client: s3Client,
         rekognitionClient: rekognitionClient,
     }
 }
 
-func (s *SolveProblemService) Perform() ([][2]int, error) {
-    problem, err := s.hackattic.GetProblem()
+func (f *FindFaceContainingTiles) Perform() ([][2]int, error) {
+    problem, err := f.hackattic.GetProblem()
     if err != nil {
         return nil, err
     }
@@ -40,12 +40,12 @@ func (s *SolveProblemService) Perform() ([][2]int, error) {
     bucket := os.Getenv("S3_BUCKET_NAME")
     path := "media/faces.jpg"
 
-    err = s.uploadImageFromUrlToS3(problem.ImageUrl, bucket, path)
+    err = f.uploadImageFromUrlToS3(problem.ImageUrl, bucket, path)
     if err != nil {
         return nil, err
     }
 
-    detectedFaces, err := s.rekognitionClient.DetectFaces(aws.S3Object{
+    detectedFaces, err := f.rekognitionClient.DetectFaces(aws.S3Object{
         Bucket: bucket,
         Name: path,
     })
@@ -53,10 +53,10 @@ func (s *SolveProblemService) Perform() ([][2]int, error) {
         return nil, err
     }
 
-    return s.findFaceContainingTiles(*detectedFaces), nil
+    return f.findFaceContainingTiles(*detectedFaces), nil
 }
 
-func (s *SolveProblemService) uploadImageFromUrlToS3(
+func (f *FindFaceContainingTiles) uploadImageFromUrlToS3(
     imageUrl string, bucket string, path string) error {
     resp, err := http.Get(imageUrl)
     if err != nil {
@@ -67,10 +67,10 @@ func (s *SolveProblemService) uploadImageFromUrlToS3(
     data, _ := io.ReadAll(resp.Body)
     reader := strings.NewReader(string(data))
 
-    err = s.s3Client.Upload(aws.UploadInput{
+    err = f.s3Client.Upload(aws.UploadInput{
         Bucket: bucket,
         Path: path,
-        Image: io.ReadSeeker(reader), 
+        Image: io.ReadSeeker(reader),
     })
     if err != nil {
         return err
@@ -86,7 +86,7 @@ type BoundingBox struct {
     FaceWidth float64
 }
 
-func (s SolveProblemService) findFaceContainingTiles(
+func (f FindFaceContainingTiles) findFaceContainingTiles(
     detectedFaces rekognition.DetectFacesOutput) [][2]int {
     faceDetails := detectedFaces.FaceDetails
 

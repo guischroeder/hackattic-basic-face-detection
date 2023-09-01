@@ -6,7 +6,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/gin-gonic/gin"
 
-    "hackattic-basic-face-detection/controller"
+    "hackattic-basic-face-detection/app/controller"
 )
 
 func main() {

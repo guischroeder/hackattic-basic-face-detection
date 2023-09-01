@@ -28,20 +28,20 @@ func SolveProblem(context *gin.Context) {
     s3Client := aws.NewS3Client(session)
     rekognitionClient := aws.NewRekognitionClient(session)
 
-    solveProblem := services.NewSolveProblemService(
+    findFaceContainingTiles := services.NewFindFaceContainingTiles(
         hackatticClient,
         s3Client,
         rekognitionClient,
     )
 
-    faceContainingTiles, err := solveProblem.Perform()
+    tiles, err := findFaceContainingTiles.Perform()
 
     if err != nil {
         context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
 
-    result, err := hackatticClient.SubmitSolution(faceContainingTiles)
+    result, err := hackatticClient.SubmitSolution(tiles)
     if err != nil {
         context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
