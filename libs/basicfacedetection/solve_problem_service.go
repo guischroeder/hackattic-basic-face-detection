@@ -84,38 +84,39 @@ func (s *SolveProblemService) uploadImageFromUrlToS3(
 }
 
 type BoundingBox struct {
-    Height float64
-    Left float64
-    Top float64
-    Width float64
+    FaceHeight float64
+    LeftCoordinate float64
+    TopCoordinate float64
+    FaceWidth float64
 }
 
 func (s SolveProblemService) findFaceContainingTiles(
     detectedFaces rekognition.DetectFacesOutput) [][2]int {
     faceDetails := detectedFaces.FaceDetails
 
-    // get size from image
     imageHeight := 800.0
     imageWidth := 800.0
     scaledBoundingBoxes := make([]BoundingBox, 0, cap(faceDetails))
     for _, faceDetail := range faceDetails {
-        boundingBox := BoundingBox{
-            Height: *faceDetail.BoundingBox.Height * imageHeight,
-            Left: *faceDetail.BoundingBox.Left * imageWidth,
-            Top: *faceDetail.BoundingBox.Top * imageHeight,
-            Width: *faceDetail.BoundingBox.Width * imageWidth,
+        scaledBoundingBox := BoundingBox{
+            FaceHeight: *faceDetail.BoundingBox.Height * imageHeight,
+            LeftCoordinate: *faceDetail.BoundingBox.Left * imageWidth,
+            TopCoordinate: *faceDetail.BoundingBox.Top * imageHeight,
+            FaceWidth: *faceDetail.BoundingBox.Width * imageWidth,
         }
 
-        scaledBoundingBoxes = append(scaledBoundingBoxes, boundingBox)
+        scaledBoundingBoxes = append(scaledBoundingBoxes, scaledBoundingBox)
     }
 
     faceContainingTiles := make([][2]int, 0, cap(scaledBoundingBoxes))
     for _, boundingBox := range scaledBoundingBoxes {
-        x := helpers.TileCoordinate(
-            helpers.CenterOfSquare(boundingBox.Left, boundingBox.Width),
+        x := helpers.TilePosition(
+            helpers.CenterOfSquare(boundingBox.LeftCoordinate, boundingBox.FaceWidth),
+            imageHeight,
         )
-        y := helpers.TileCoordinate(
-            helpers.CenterOfSquare(boundingBox.Top, boundingBox.Height),
+        y := helpers.TilePosition(
+            helpers.CenterOfSquare(boundingBox.TopCoordinate, boundingBox.FaceHeight),
+            imageWidth,
         )
 
         faceContainingTiles = append(faceContainingTiles, [2]int{x, y})
