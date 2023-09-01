@@ -1,24 +1,36 @@
 package hackattic
 
 import (
+	"io"
 	"net/http"
-	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"hackattic-basic-face-detection/infra/httpclient"
 )
+
+var (
+	getRequestFunc func(url string) (*http.Response, error)
+)
+
+type httpClientGetMock struct {}
+func (h *httpClientGetMock) Get(request string) (*http.Response, error) {
+    return getRequestFunc(request)
+}
 
 func TestGetProblem(t *testing.T) {
     response := `{
         "image_url": "http://hackattic.com/image"
     }`
-
-    server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(200)
-        _, _ = w.Write([]byte(response))
-    }))
-
-    defer server.Close()
+    getRequestFunc = func(url string) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(strings.NewReader(response)),
+		}, nil
+	}
+    httpclient.Client = &httpClientGetMock{}
 
     hm := HackatticClient{
         AccessToken: "token",

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"hackattic-basic-face-detection/infra/httpclient"
 )
 
 type HackatticClient struct {
@@ -20,10 +22,8 @@ const BASE_URL = "https://hackattic.com/challenges/basic_face_detection"
 
 func (h HackatticClient) GetProblem() (Problem, error) {
     url := fmt.Sprintf("%s/problem?access_token=%s", BASE_URL, h.AccessToken)
-    request, _ := http.NewRequest(http.MethodGet, url, nil)
+    response, err := httpclient.Client.Get(url)
     problem := Problem{}
-
-    response, err := h.HttpClient.Do(request)
     if err != nil {
         return problem, err
     }
@@ -31,7 +31,6 @@ func (h HackatticClient) GetProblem() (Problem, error) {
     defer response.Body.Close()
 
     err = json.NewDecoder(response.Body).Decode(&problem)
-
     if err != nil {
         return problem, err
     }
@@ -49,19 +48,18 @@ type Result struct {
 }
 
 func (h HackatticClient) SubmitSolution(faceTiles [][2]int) (Result, error) {
-    url := fmt.Sprintf("%s/solve?access_token=%s&playground=1", BASE_URL, h.AccessToken)
+    url := fmt.Sprintf("%s/solve?access_token=%s", BASE_URL, h.AccessToken)
     result := Result{}
 
     buffer := new(bytes.Buffer)
     solution := Solution{FaceTiles: faceTiles}
-    json.NewEncoder(buffer).Encode(solution.FaceTiles)
+    json.NewEncoder(buffer).Encode(solution)
 
     request, _ := http.NewRequest(http.MethodPost, url, buffer)
     request.Header.Add("Content-Type", "application/json")
 
     response, err := h.HttpClient.Do(request)
     if err != nil {
-        fmt.Println(err)
         return result, err
     }
 
@@ -70,7 +68,6 @@ func (h HackatticClient) SubmitSolution(faceTiles [][2]int) (Result, error) {
     err = json.NewDecoder(response.Body).Decode(&result)
 
     if err != nil {
-        fmt.Println(err)
         return result, err
     }
 
