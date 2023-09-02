@@ -2,17 +2,18 @@ package aws
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rekognition"
+	"github.com/aws/aws-sdk-go/service/rekognition/rekognitioniface"
 )
 
+
 type RekognitionClient struct {
-    rekognition *rekognition.Rekognition
+    RekognitionApi rekognitioniface.RekognitionAPI
 }
 
-func NewRekognitionClient(session *session.Session) *RekognitionClient {
+func NewRekognitionClient(rekognition *rekognition.Rekognition) *RekognitionClient {
     return &RekognitionClient{
-        rekognition: rekognition.New(session),
+        RekognitionApi: rekognition,
     }
 }
 
@@ -22,7 +23,7 @@ type S3Object struct {
 }
 
 func (r *RekognitionClient) DetectFaces(s3Object S3Object) (*rekognition.DetectFacesOutput, error) {
-    faces, err := r.rekognition.DetectFaces(&rekognition.DetectFacesInput{
+    faces, err := r.RekognitionApi.DetectFaces(&rekognition.DetectFacesInput{
         Image: &rekognition.Image{
             S3Object: &rekognition.S3Object{
                 Bucket: aws.String(s3Object.Bucket),

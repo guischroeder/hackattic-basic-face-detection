@@ -4,17 +4,17 @@ import (
 	"io"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 )
 
 type S3Client struct {
-    s3 *s3.S3
+    S3Api s3iface.S3API
 }
 
-func NewS3Client(session *session.Session) *S3Client {
+func NewS3Client(s3 *s3.S3) *S3Client {
     return &S3Client{
-        s3: s3.New(session),
+        S3Api: s3,
     }
 }
 
@@ -31,7 +31,7 @@ func (s *S3Client) Upload(input UploadInput) error {
         Body: input.Image,
     }
 
-    _, err := s.s3.PutObject(&putObjectInput)
+    _, err := s.S3Api.PutObject(&putObjectInput)
 
     if err != nil {
         return err
