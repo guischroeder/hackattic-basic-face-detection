@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"hackattic-basic-face-detection/infra/httpclient"
+	"hackattic-basic-face-detection/infra/http_client"
 )
 
 type HackatticClient struct {

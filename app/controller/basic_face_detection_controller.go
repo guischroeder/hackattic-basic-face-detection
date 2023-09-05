@@ -14,10 +14,6 @@ import (
 )
 
 func SolveProblem(context *gin.Context) {
-    hackatticClient := hackattic.HackatticClient{
-        AccessToken: os.Getenv("HACKATTIC_ACCESS_TOKEN"),
-    }
-
     session, err := aws.NewSession(
         os.Getenv("AWS_ACCESS_KEY_ID"),
         os.Getenv("AWS_SECRET_ACCESS_KEY"),
@@ -29,16 +25,23 @@ func SolveProblem(context *gin.Context) {
     }
 
     s3Api := s3.New(session)
-    rekognitionApi := rekognition.New(session)
     s3Client := aws.NewS3Client(s3Api)
+    rekognitionApi := rekognition.New(session)
     rekognitionClient := aws.NewRekognitionClient(rekognitionApi)
+    detectFaces := services.NewDetectFaces(s3Client, rekognitionClient)
 
-    findFaceContainingTiles := services.NewFindFaceContainingTiles(
-        hackatticClient,
-        s3Client,
-        rekognitionClient,
-    )
-    tiles, err := findFaceContainingTiles.Perform()
+    hackatticClient := hackattic.HackatticClient{
+        AccessToken: os.Getenv("HACKATTIC_ACCESS_TOKEN"),
+    }
+    problem, err := hackatticClient.GetProblem()
+
+    detectedFaces, err := detectFaces.Perform(problem)
+    if err != nil {
+        context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    tiles, err := services.FindFaceContainingTiles(detectedFaces)
     if err != nil {
         context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
