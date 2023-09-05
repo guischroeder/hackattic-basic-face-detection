@@ -7,9 +7,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/rekognition"
 
-	"hackattic-basic-face-detection/infra/aws"
-	"hackattic-basic-face-detection/infra/hackattic"
-	"hackattic-basic-face-detection/infra/http_client"
+	"hackattic-basic-face-detection/libs/aws"
+	"hackattic-basic-face-detection/libs/hackattic"
+	"hackattic-basic-face-detection/libs/http_client"
 )
 
 const PATH = "media/faces.jpg"

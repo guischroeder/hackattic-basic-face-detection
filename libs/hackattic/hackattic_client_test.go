@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"hackattic-basic-face-detection/infra/http_client"
+	"hackattic-basic-face-detection/libs/http_client"
 )
 
 var (

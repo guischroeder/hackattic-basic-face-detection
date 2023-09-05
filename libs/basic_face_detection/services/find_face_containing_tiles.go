@@ -3,7 +3,7 @@ package services
 import (
 	"github.com/aws/aws-sdk-go/service/rekognition"
 
-	"hackattic-basic-face-detection/app/helpers"
+	"hackattic-basic-face-detection/libs/basic_face_detection/helpers"
 )
 
 const IMAGE_HEIGHT = 800.0

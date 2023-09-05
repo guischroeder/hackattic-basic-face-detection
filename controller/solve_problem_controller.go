@@ -8,9 +8,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
 
-	"hackattic-basic-face-detection/app/services"
-	"hackattic-basic-face-detection/infra/aws"
-	"hackattic-basic-face-detection/infra/hackattic"
+	"hackattic-basic-face-detection/libs/basic_face_detection/services"
+	"hackattic-basic-face-detection/libs/aws"
+	"hackattic-basic-face-detection/libs/hackattic"
 )
 
 func SolveProblem(context *gin.Context) {
