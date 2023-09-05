@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDetectFaces(t *testing.T) {
+func TestFindFaceContainingTiles(t *testing.T) {
     var heigh float64 = 0.5
     var top float64 = 0.05
     var left float64 = 0.05
@@ -28,4 +28,13 @@ func TestDetectFaces(t *testing.T) {
     result, _ := FindFaceContainingTiles(detectedFaces)
 
     assert.Equal(t, result, [][2]int{{2,2}, {2,2},{2,2}})
+}
+
+func TestWithEmptyFaceDetails(t *testing.T) {
+    detectedFaces := &rekognition.DetectFacesOutput{
+        FaceDetails: []*rekognition.FaceDetail{} ,
+    }
+    _, err := FindFaceContainingTiles(detectedFaces)
+
+    assert.Error(t, err)
 }

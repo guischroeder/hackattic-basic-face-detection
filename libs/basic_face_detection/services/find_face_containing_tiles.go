@@ -1,6 +1,8 @@
 package services
 
 import (
+	"errors"
+
 	"github.com/aws/aws-sdk-go/service/rekognition"
 
 	"hackattic-basic-face-detection/libs/basic_face_detection/helpers"
@@ -18,6 +20,10 @@ type BoundingBox struct {
 
 func FindFaceContainingTiles(detectedFaces *rekognition.DetectFacesOutput) ([][2]int, error) {
     faceDetails := detectedFaces.FaceDetails
+
+    if len(faceDetails) == 0 {
+       return nil, errors.New("Error when trying to find tiles containing faces because no faces were detected.")
+    }
  
     scaledBoundingBoxes := make([]BoundingBox, 0, cap(faceDetails))
     for _, faceDetail := range faceDetails {
