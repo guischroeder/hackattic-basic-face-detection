@@ -1,25 +1,25 @@
-package services
+package basicfacedetection
 
 import (
-	"io"
-	"os"
-	"strings"
+    "io"
+    "net/http"
+    "os"
+    "strings"
 
-	"github.com/aws/aws-sdk-go/service/rekognition"
-
-	"hackattic-basic-face-detection/libs/aws"
-	"hackattic-basic-face-detection/libs/hackattic"
-	"hackattic-basic-face-detection/libs/http_client"
+    "hackattic-basic-face-detection/internal/hackattic"
+    "hackattic-basic-face-detection/internal/aws/s3"
+    "hackattic-basic-face-detection/internal/aws/rekognition"
 )
 
 const PATH = "media/faces.jpg"
 
 type DetectFaces struct {
-    s3Client *aws.S3Client
-    rekognitionClient *aws.RekognitionClient
+    s3 *s3.S3
+    rekognition *rekognition.Rekognition
+    HttpClient http.Client
 }
-func NewDetectFaces(s3Client *aws.S3Client, rekognitionClient *aws.RekognitionClient) *DetectFaces {
-    return &DetectFaces{s3Client: s3Client, rekognitionClient: rekognitionClient}
+func NewDetectFaces(s3 *s3.S3, rekognition *rekognition.Rekognition) *DetectFaces {
+    return &DetectFaces{s3: s3, rekognition: rekognition}
 }
 
 func (d *DetectFaces) Perform(problem hackattic.Problem) (*rekognition.DetectFacesOutput, error) {
@@ -30,10 +30,7 @@ func (d *DetectFaces) Perform(problem hackattic.Problem) (*rekognition.DetectFac
         return nil, err
     }
 
-    detectedFaces, err := d.rekognitionClient.DetectFaces(aws.S3Object{
-        Bucket: bucket,
-        Name: PATH,
-    })
+    detectedFaces, err := d.rekognition.DetectFaces(bucket, PATH)
     if err != nil {
         return nil, err
     }
@@ -43,16 +40,19 @@ func (d *DetectFaces) Perform(problem hackattic.Problem) (*rekognition.DetectFac
 
 func (d *DetectFaces) uploadImageFromUrlToS3(
     imageUrl string, bucket string, path string) error {
-    resp, err := httpclient.Client.Get(imageUrl)
+	request, err := http.NewRequest(http.MethodGet, imageUrl, nil)
+
+    response, err := d.HttpClient.Do(request)
+
     if err != nil {
         return err
     }
-    defer resp.Body.Close()
+    defer response.Body.Close()
 
-    data, _ := io.ReadAll(resp.Body)
+    data, _ := io.ReadAll(response.Body)
     reader := strings.NewReader(string(data))
 
-    err = d.s3Client.Upload(aws.UploadInput{
+    err = d.s3.Upload(s3.UploadInput{
         Bucket: bucket,
         Path: path,
         Image: io.ReadSeeker(reader),

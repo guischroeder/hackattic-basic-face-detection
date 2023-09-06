@@ -4,9 +4,8 @@ import (
 	"log"
 
 	"github.com/joho/godotenv"
-	"github.com/gin-gonic/gin"
 
-    "hackattic-basic-face-detection/controller"
+    "hackattic-basic-face-detection/internal/basicfacedetection"
 )
 
 func main() {
@@ -15,8 +14,11 @@ func main() {
         log.Fatalf("Error loading .env file: %s", err)
     }
 
-    router := gin.Default()
-    router.POST("/solve", controller.SolveProblem)
-    router.Run()
+    result, err := basicfacedetection.SolveProblem()
+    if err != nil {
+        log.Fatalln(err)
+    }
+
+    log.Println(result)
 }
 

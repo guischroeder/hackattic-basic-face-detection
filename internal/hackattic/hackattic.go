@@ -1,12 +1,10 @@
 package hackattic
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"net/http"
-
-	"hackattic-basic-face-detection/libs/http_client"
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "net/http"
 )
 
 type HackatticClient struct {
@@ -22,8 +20,17 @@ const BASE_URL = "https://hackattic.com/challenges/basic_face_detection"
 
 func (h HackatticClient) GetProblem() (Problem, error) {
     url := fmt.Sprintf("%s/problem?access_token=%s", BASE_URL, h.AccessToken)
-    response, err := httpclient.Client.Get(url)
+
+    request, err := http.NewRequest(http.MethodGet, url, nil)
+    request.Header.Add("Accept", `application/json`)
     problem := Problem{}
+
+    if err != nil {
+        return problem, err
+    }
+
+    response, err := h.HttpClient.Do(request)
+
     if err != nil {
         return problem, err
     }
