@@ -1,6 +1,6 @@
-(ns hackattic-basic-face-detection.client.hackattic-test
+(ns hackattic-basic-face-detection.hackattic.client-test
   (:require [clojure.test :refer [deftest is testing]]
-            [hackattic-basic-face-detection.client.hackattic :as client]
+            [hackattic-basic-face-detection.hackattic.client :as client]
             [clj-http.client :as http]
             [cheshire.core :as json]
             [clojure.java.io :as io]))

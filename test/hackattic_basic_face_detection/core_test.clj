@@ -1,7 +1,7 @@
 (ns hackattic-basic-face-detection.core-test
   (:require [clojure.test :refer [deftest is testing]]
             [hackattic-basic-face-detection.core :as core]
-            [hackattic-basic-face-detection.client.hackattic :as client]
+            [hackattic-basic-face-detection.hackattic.client :as client]
             [hackattic-basic-face-detection.face_detection.face_detector :as face]))
 
 (deftest solve-face-detection-test

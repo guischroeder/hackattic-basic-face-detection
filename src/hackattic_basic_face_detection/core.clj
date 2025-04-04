@@ -1,5 +1,5 @@
 (ns hackattic-basic-face-detection.core
-  (:require [hackattic-basic-face-detection.client.hackattic :as client]
+  (:require [hackattic-basic-face-detection.hackattic.client :as client]
             [hackattic-basic-face-detection.face_detection.face_detector :as face])
   (:gen-class))
 
