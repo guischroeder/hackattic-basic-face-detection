@@ -1,6 +1,6 @@
-(ns hackattic-basic-face-detection.detection.face-test
+(ns hackattic-basic-face-detection.face_detection.face_detector-test
   (:require [clojure.test :refer [deftest is testing use-fixtures]]
-            [hackattic-basic-face-detection.detection.face :as face])
+            [hackattic-basic-face-detection.face_detection.face_detector :as face])
   (:import [org.bytedeco.opencv.opencv_core Mat RectVector Rect]
            [org.bytedeco.opencv.opencv_objdetect CascadeClassifier]))
 

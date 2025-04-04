@@ -1,8 +1,8 @@
-(ns hackattic-basic-face-detection.challenge-test
+(ns hackattic-basic-face-detection.core-test
   (:require [clojure.test :refer [deftest is testing]]
-            [hackattic-basic-face-detection.challenge :as challenge]
-            [hackattic-basic-face-detection.api.hackattic :as api]
-            [hackattic-basic-face-detection.detection.face :as face]))
+            [hackattic-basic-face-detection.core :as core]
+            [hackattic-basic-face-detection.client.hackattic :as client]
+            [hackattic-basic-face-detection.face_detection.face_detector :as face]))
 
 (deftest solve-face-detection-test
   (testing "End-to-end face detection challenge workflow"
@@ -12,16 +12,16 @@
           test-face-coordinates [{:x 100 :y 200 :width 50 :height 60}]
           test-api-result {:result "success"}]
 
-      (with-redefs [api/get-problem (fn [token]
+      (with-redefs [client/get-problem (fn [token]
                                       (is (= test-token token))
-                                      L                      {:image_url test-image-url})
+                                      {:image_url test-image-url})
 
-                    api/download-image (fn [url path]
+                    client/download-image (fn [url path]
                                          (is (= test-image-url url))
                                          (is (= test-image-path path))
                                          test-image-path)
 
-                    api/submit-solution (fn [token coordinates]
+                    client/submit-solution (fn [token coordinates]
                                           (is (= test-token token))
                                           (is (= test-face-coordinates coordinates))
                                           test-api-result)
@@ -30,6 +30,19 @@
                                         (is (= test-image-path path))
                                         test-face-coordinates)]
 
-        (let [result (challenge/solve-face-detection test-token)]
+        (let [result (core/solve-face-detection test-token)]
           (is (= test-api-result result))
           (is (= "success" (:result result))))))))
+
+(deftest get-access-token-test
+  (testing "Getting access token from args"
+    (let [args ["test-token"]]
+      (is (= "test-token" (core/get-access-token args)))))
+  
+  (testing "Getting access token from environment"
+    (System/setProperty "HACKATTIC_TOKEN" "env-token")
+    (is (= "env-token" (core/get-access-token []))))
+  
+  (testing "Throws exception when no token available"
+    (System/clearProperty "HACKATTIC_TOKEN")
+    (is (thrown? IllegalArgumentException (core/get-access-token [])))))

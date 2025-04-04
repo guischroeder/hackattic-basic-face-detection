@@ -1,6 +1,6 @@
-(ns hackattic-basic-face-detection.api.hackattic-test
+(ns hackattic-basic-face-detection.client.hackattic-test
   (:require [clojure.test :refer [deftest is testing]]
-            [hackattic-basic-face-detection.api.hackattic :as api]
+            [hackattic-basic-face-detection.client.hackattic :as client]
             [clj-http.client :as http]
             [cheshire.core :as json]
             [clojure.java.io :as io]))
@@ -12,10 +12,10 @@
                          :body {:image_url "https://example.com/test-image.jpg"}}]
 
       (with-redefs [http/get (fn [url _]
-                               (is (= (str api/base-url "/problem?access_token=" test-token) url))
+                               (is (= (str client/base-url "/problem?access_token=" test-token) url))
                                mock-response)]
 
-        (let [result (api/get-problem test-token)]
+        (let [result (client/get-problem test-token)]
           (is (= (:body mock-response) result))
           (is (= "https://example.com/test-image.jpg" (:image_url result))))))))
 
@@ -34,7 +34,7 @@
                                        (is (= test-path path))
                                        mock-output-stream)]
 
-        (let [result (api/download-image test-url test-path)]
+        (let [result (client/download-image test-url test-path)]
           (is (= test-path result)))))))
 
 (deftest submit-solution-test
@@ -46,11 +46,11 @@
                          :body {:result "success"}}]
 
       (with-redefs [http/post (fn [url {:keys [body content-type]}]
-                                (is (= (str api/base-url "/solve?access_token=" test-token) url))
+                                (is (= (str client/base-url "/solve?access_token=" test-token) url))
                                 (is (= :json content-type))
                                 (is (= (json/generate-string expected-solution) body))
                                 mock-response)]
 
-        (let [result (api/submit-solution test-token test-coordinates)]
+        (let [result (client/submit-solution test-token test-coordinates)]
           (is (= (:body mock-response) result))
           (is (= "success" (:result result))))))))
