@@ -1,4 +1,4 @@
-(ns hackattic-basic-face-detection.detection.face
+(ns hackattic-basic-face-detection.face_detection.face_detector
   (:require [clojure.java.io :as io])
   (:import [org.bytedeco.opencv.opencv_core Mat Rect RectVector Size]
            [org.bytedeco.opencv.opencv_imgcodecs Imgcodecs]

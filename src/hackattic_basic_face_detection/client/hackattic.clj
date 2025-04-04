@@ -1,4 +1,4 @@
-(ns hackattic-basic-face-detection.api.hackattic
+(ns hackattic-basic-face-detection.client.hackattic
   (:require [clj-http.client :as http]
             [cheshire.core :as json]
             [clojure.java.io :as io]))
