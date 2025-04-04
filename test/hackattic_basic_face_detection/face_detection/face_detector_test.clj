@@ -1,8 +1,7 @@
-(ns hackattic-basic-face-detection.face_detection.face_detector-test
-  (:require [clojure.test :refer [deftest is testing use-fixtures]]
-            [hackattic-basic-face-detection.face_detection.face_detector :as face])
-  (:import [org.bytedeco.opencv.opencv_core Mat RectVector Rect]
-           [org.bytedeco.opencv.opencv_objdetect CascadeClassifier]))
+(ns hackattic-basic-face-detection.face-detection.face-detector-test
+  (:require [clojure.test :refer [deftest is testing]]
+            [hackattic-basic-face-detection.face-detection.face-detector :as face])
+  (:import [org.bytedeco.opencv.opencv_core Mat RectVector Rect]))
 
 (deftest detection-params-test
   (testing "Detection parameters have expected values"
@@ -22,10 +21,7 @@
 
 (deftest detect-faces-test
   (testing "Face detection with mocked dependencies"
-    (let [original-detect-faces-in-image face/detect-faces-in-image
-          original-load-and-preprocess face/load-and-preprocess-image
-          original-ensure-cascade face/ensure-cascade-file
-          test-rect (doto (Rect.) (.x 100) (.y 200) (.width 50) (.height 60))
+    (let [test-rect (doto (Rect.) (.x 100) (.y 200) (.width 50) (.height 60))
           test-faces (doto (RectVector.) (.push_back test-rect))]
 
       (with-redefs [face/ensure-cascade-file (fn [] nil)

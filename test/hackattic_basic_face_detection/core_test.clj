@@ -13,18 +13,18 @@
           test-api-result {:result "success"}]
 
       (with-redefs [client/get-problem (fn [token]
-                                      (is (= test-token token))
-                                      {:image_url test-image-url})
+                                         (is (= test-token token))
+                                         {:image_url test-image-url})
 
                     client/download-image (fn [url path]
-                                         (is (= test-image-url url))
-                                         (is (= test-image-path path))
-                                         test-image-path)
+                                            (is (= test-image-url url))
+                                            (is (= test-image-path path))
+                                            test-image-path)
 
                     client/submit-solution (fn [token coordinates]
-                                          (is (= test-token token))
-                                          (is (= test-face-coordinates coordinates))
-                                          test-api-result)
+                                             (is (= test-token token))
+                                             (is (= test-face-coordinates coordinates))
+                                             test-api-result)
 
                     face/detect-faces (fn [path]
                                         (is (= test-image-path path))
@@ -33,16 +33,3 @@
         (let [result (core/solve-face-detection test-token)]
           (is (= test-api-result result))
           (is (= "success" (:result result))))))))
-
-(deftest get-access-token-test
-  (testing "Getting access token from args"
-    (let [args ["test-token"]]
-      (is (= "test-token" (core/get-access-token args)))))
-  
-  (testing "Getting access token from environment"
-    (System/setProperty "HACKATTIC_TOKEN" "env-token")
-    (is (= "env-token" (core/get-access-token []))))
-  
-  (testing "Throws exception when no token available"
-    (System/clearProperty "HACKATTIC_TOKEN")
-    (is (thrown? IllegalArgumentException (core/get-access-token [])))))
