@@ -14,7 +14,7 @@
 
       (with-redefs [api/get-problem (fn [token]
                                       (is (= test-token token))
-                                      r                      {:image_url test-image-url})
+                                      L                      {:image_url test-image-url})
 
                     api/download-image (fn [url path]
                                          (is (= test-image-url url))
